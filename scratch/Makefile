@@ -5,7 +5,7 @@
 # do not download zip when unzipped inserts/ exists
 # do not unzip to inserts/ when inserts/ exists
 
-db = foo
+db = aiddata21
 
 all : insert
 
