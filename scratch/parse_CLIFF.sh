@@ -26,13 +26,17 @@ parallel '
 	cities=$( get_focus {} cities )
 	states=$( get_focus {} states )
 	countries=$( get_focus {} countries )
-	count_cities=$( echo "$cities" | wc -l )
-	count_states=$( echo "$states" | wc -l )
-	count_countries=$( echo "$countries" | wc -l )
-	if [[ $count_cities == 1 && $count_states > 1 ]]; then 
-		echo {}
-		echo -e "$count_cities\t$count_states\t$count_countries"
-	fi
+	count_cities=$( echo "$cities" | grep -vE "^$" | wc -l )
+	count_states=$( echo "$states" | grep -vE "^$" | wc -l )
+	count_countries=$( echo "$countries" | grep -vE "^$" | wc -l )
+	echo -e "$count_cities\t$count_states\t$count_countries"
+# this prints the JSON if there is a city mentioned *and* state mentioned that does not contain that city (naive method - looks for count)
+#	if [[ $count_cities == 1 && $count_states > 1 ]]; then 
+#		echo {}
+#		echo -e "$count_cities\t$count_states\t$count_countries"
+#	fi
+
+# this uses the lowest level available - however, we really ought to keep the lowest level children generally (eg, one city and one state that does not contain that city)
 #	if [[ -n "$cities" ]]; then 
 #		echo $cities
 #	elif [[ -n "$states" ]]; then
