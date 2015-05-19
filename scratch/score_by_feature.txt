@@ -1,3 +1,4 @@
+score,featureClass,featureCode
 1,A,PCLI
 1,A,PCLI
 2,P,PPLA
