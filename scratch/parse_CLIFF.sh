@@ -2,46 +2,47 @@
 # parse CLIFF JSON outputs
 # take lowest level focus - city, state, or country
 # take all mentions
-# save as TSV
+# save as CSV
 # records id used by output/ids TSV
-# TODO
-# if mention has same geoid as focus, report its mentions.source.string
 # example use: $0 ../output/no_replaceAllDemonyms/ 
-
 indir=$1
-
-# get fields from mentions
-function get_mentions { cat $1 | jq '.results.places.mentions[]|[.id,.name,.lat,.lon,.featureClass,.featureCode,.source.string]|@csv'; }
-export -f get_mentions
-# get fields from cities, states, or countries
-function get_focus { cat $1 | jq --arg level $2 '.results.places.focus|select(.[$level] != null)|select(.[$level] != [])|.[$level][]|[.id,.name,.lat,.lon,.featureClass,.featureCode,.score]|@csv';}
-export -f get_focus
-# for every JSON output from CLIFF, get mentions and get lowest level focus
+# path to hash_diff.pl - great for comparing unordered lists
+hash_diff=./hash_diff.pl
+# apostraphe for gnu parallel 
+a="'"
+# function to get blacklist of geoids from focus - states that have cities mentioned, countries that have states mentioned, countries that have cities mentioned
+# this is intended to blacklist any parents whose children are present - in other words, take only leaves of the tree
+function get_geoid_blacklist { 
+	hash_diff=$2
+	cities_state_ids=$( cat $1 | jq '.results.places.focus.cities[]|.stateGeoNameId|tonumber' 2>/dev/null )
+	state_ids=$( cat $1 | jq '.results.places.focus.states[]|.id' 2>/dev/null )
+	ignore_states_parent_cities=$( $hash_diff -a <(echo "$cities_state_ids" | grep -vE "^$") -b <( echo "$state_ids"|grep -vE "^$" ) | grep equal | grep -oE "^[^:]*" )
+	states_country_ids=$( cat $1 | jq '.results.places.focus.states[]|.countryGeoNameId|tonumber' 2>/dev/null )
+	country_ids=$( cat $1 | jq '.results.places.focus.countries[]|.id' 2>/dev/null )
+	ignore_countries_parent_states=$( $hash_diff -a <(echo "$states_country_ids" | grep -vE "^$") -b <( echo "$country_ids"|grep -vE "^$" ) | grep equal | grep -oE "^[^:]*" )
+	cities_country_ids=$( cat $1 | jq '.results.places.focus.cities[]|.countryGeoNameId|tonumber' 2>/dev/null )
+	ignore_countries_parent_cities=$( $hash_diff -a <(echo "$cities_country_ids" | grep -vE "^$") -b <( echo "$country_ids"|grep -vE "^$" ) | grep equal | grep -oE "^[^:]*" )
+	blacklist_geoids=$( cat <(echo "$ignore_states_parent_cities") <(echo "$ignore_countries_parent_states") <(echo "$ignore_countries_parent_cities") | sort | uniq | grep -vE "^$" )
+	echo "$blacklist_geoids"
+}
+# make available to gnu parallel
+export -f get_geoid_blacklist
+# now for every json in the input dir, find the blacklist of geoids and get a csv from the json.  ignore any record with blacklisted geoid
 find $indir -type f |\
-parallel '
-	#get_mentions {}
-	# get the lowest level of focus available
-	# NB: but what about the case where one city is found, and two states?
-	# NB: rarely there will be cities but no state, etc - odd
-	cities=$( get_focus {} cities )
-	states=$( get_focus {} states )
-	countries=$( get_focus {} countries )
-	count_cities=$( echo "$cities" | grep -vE "^$" | wc -l )
-	count_states=$( echo "$states" | grep -vE "^$" | wc -l )
-	count_countries=$( echo "$countries" | grep -vE "^$" | wc -l )
-	echo -e "$count_cities\t$count_states\t$count_countries"
-# this prints the JSON if there is a city mentioned *and* state mentioned that does not contain that city (naive method - looks for count)
-#	if [[ $count_cities == 1 && $count_states > 1 ]]; then 
-#		echo {}
-#		echo -e "$count_cities\t$count_states\t$count_countries"
-#	fi
-
-# this uses the lowest level available - however, we really ought to keep the lowest level children generally (eg, one city and one state that does not contain that city)
-#	if [[ -n "$cities" ]]; then 
-#		echo $cities
-#	elif [[ -n "$states" ]]; then
-#		echo "$states"
-#	elif [[ -n "$countries" ]]; then
-#		echo "$countries"
-#	fi 
+parallel --gnu '
+	# get blacklist of geoids - these are geoids of parents in focus that also have children in focus
+	blacklist_geoids=$( get_geoid_blacklist {} '$hash_diff' )
+	# get the following fields from mentions and focus as csv
+	# NB jq csv outs very messy in terms of escaped double quotes
+	# geonames id,placename,lat,lng,featureClass,featureCode,is_mention,is_focus,focus level,focus score 
+	tmpcsv=$(cat {} |\
+	jq '$a'[(.results.places.mentions[]|[.id,.name,.lat,.lon,.featureClass,.featureCode,1,0,"NA","NA"]),(.results.places.focus.cities[]|[.id,.name,.lat,.lon,.featureClass,.featureCode,0,1,"cities",.score]),(.results.places.focus.states[]|[.id,.name,.lat,.lon,.featureClass,.featureCode,0,1,"states",.score]),(.results.places.focus.countries[]|[.id,.name,.lat,.lon,.featureClass,.featureCode,0,1,"countries",.score])|@csv]'$a' 2>/dev/null |\
+        grep -vE "^\[|^\]" |\
+       	sed "s:^\s\+::g;s:\s\+$::g" |\
+       	sed "s:^\"\|\"$::g;s:\\\::g" |\
+	sed "s:\"\+:\":g" | sed "s:,$::g" )
+	# if there is an tmpcsv to speak of them clean up formatting and append json file basename
+	if [[ $(echo "$tmpcsv" | grep -vE "^$" | wc -l) > 0 ]]; then
+		grep -vEf <(echo "$blacklist_geoids" | sed "s:^:^:g;s:$:,:g") <( echo "$tmpcsv") | sort | uniq | sed "s:^:$( basename {} ),:g"
+	fi
 '
