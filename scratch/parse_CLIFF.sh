@@ -65,7 +65,7 @@ if [[ -z $indir ]]; then
 		sed "s:\"\+:\":g" | sed "s:,$::g" )
 		# if there is an tmpcsv to speak of them clean up formatting and append json file basename
 		if [[ $(echo "$tmpcsv" | grep -vE "^$" | wc -l) > 0 ]]; then
-			grep -vEf <(echo "$blacklist_geoids" | sed "s:^:^:g;s:$:,:g") <( echo "$tmpcsv") | sort | uniq | sed "s:^:${id_field},:g"
+			grep -vEf <(echo "$blacklist_geoids" | sed "s:^:^:g;s:$:,:g") <( echo "$tmpcsv") | sort | uniq | sed "s:^:$( echo ${id_field} | sed "s:,:|:g"),:g"
 		fi
 		rm $cliffjson
 	'
