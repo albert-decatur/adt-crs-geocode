@@ -1,3 +1,5 @@
+*.swp
+*.swo
 scratch/inserts/*
 scratch/aiddata2_1_full_inserts_sql.zip
 output/
