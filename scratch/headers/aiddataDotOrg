@@ -1,0 +1,75 @@
+1	AidData Project ID
+2	Title
+3	Organization
+4	Organization ISO
+5	Organization Role
+6	Organization
+7	Organization ISO
+8	Organization Role
+9	Organization
+10	Organization ISO
+11	Organization Role
+12	Other Organizations
+13	Source
+14	Start Date (DD/MM/YYYY)
+15	End Date (DD/MM/YYYY)
+16	Planned Start Date (DD/MM/YYYY)
+17	Planned End Date (DD/MM/YYYY)
+18	AidData Sector Code
+19	AidData Sector Name
+20	AidData Purpose Code
+21	AidData Purpose Name
+22	AidData Activity Code(s)
+23	AidData Activity Name(s)
+24	Short Description
+25	Long Description
+26	Donor Project ID
+27	Donor Secondary Project ID
+28	Additional Info
+29	Project Commitment Amount (Constant USD2011)
+30	Project Disbursement Amount (Constant USD2011)
+31	Total Project Cost (Donor Reported)
+32	CRS: Untied Amount (Nominal USD)
+33	CRS: Tied Amount (Nominal USD)
+34	CRS: Partial Tied Amount (Nominal USD)
+35	CRS: Pdgg
+36	CRS: Channel Code
+37	CRS: Bi Multi
+38	CRS: Desertification
+39	CRS: Environment
+40	CRS: Gender
+41	CRS: Trade
+42	CRS: Climate
+43	CRS: Biodiversity
+44	CRS: Region
+45	CRS: Sector Code
+46	CRS: Sector
+47	CRS: Purpose Code
+48	CRS: Purpose Name
+49	CRS: Flow Name
+50	CRS: Finance T
+51	CRS: Associated Financing
+52	CRS: Future Ds Principal Amount Usd Nominal
+53	CRS: Future Ds Interest Amount Usd Nominal
+54	CRS: Irtc Amount Usd Nominal
+55	CRS: Received Amount Usd Nominal
+56	AidData ID
+57	Project Title
+58	Source Label
+59	Source ID
+60	Transaction Type
+61	Date (DD/MM/YYYY)
+62	Year
+63	Funding Region
+64	Funding Organization
+65	Funding Organisation ISO
+66	Provider Name
+67	Receiver Region
+68	Receiver Country
+69	Receiver Country ISO
+70	Amount (Original Currency)
+71	Original Currency
+72	Amount (Constant USD2011)
+73	Amount (Nominal USD2011)
+74	Type of Assistance
+75	Receiver
