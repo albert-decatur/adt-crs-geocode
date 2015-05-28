@@ -10,7 +10,7 @@
 # example use: cat foo.txt | $0 
 indir=$1
 # path to hash_diff.pl - great for comparing unordered lists
-hash_diff=./hash_diff.pl
+hash_diff=$(dirname $0)/hash_diff.pl
 # apostraphe for gnu parallel 
 a="'"
 # function to get blacklist of geoids from focus - states that have cities mentioned, countries that have states mentioned, countries that have cities mentioned
