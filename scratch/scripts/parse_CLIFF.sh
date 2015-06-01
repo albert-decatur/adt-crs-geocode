@@ -1,4 +1,5 @@
 #!/bin/bash
+# TODO remove quote that sometimes appears at end of records from STDIN inputs
 # parse CLIFF JSON outputs
 # take lowest level focus - city, state, or country
 # take all mentions
